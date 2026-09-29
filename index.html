@@ -38,8 +38,8 @@
     // Écoute de l'accéléromètre
     function GérerMouvement(event) {
       // Inversion des axes selon la tenue du téléphone
-      carre.ax = (event.accelerationIncludingGravity.x || 0) * 0.5;
-      carre.ay = -(event.accelerationIncludingGravity.y || 0) * 0.5;
+      carre.ax = (event.accelerationExcludingGravity.x || 0);
+      carre.ay = -(event.accelerationExcludingGravity.y || 0);
     }
 
     // Mise à jour de la physique
