@@ -36,18 +36,22 @@
     // Écoute directe des mouvements sans permission préalable
     window.addEventListener('devicemotion', (event) => {
       if (event.accelerationIncludingGravity) {
-        carre.ax = (event.acceleration.x || 0) / 100;
-        carre.ay = -(event.acceleration.y || 0) / 100;
+        carre.ax = (event.acceleration.x || 0) / 20;
+        carre.ay = -(event.acceleration.y || 0) / 20;
       }
     });
 
-    // Physique
-    function mettreAJour() {
-      carre.vx += carre.ax * frottement;
-      carre.vy += carre.ay * frottement;
+    const dt = 0.02;
+    let dernierTemps = performance.now();
+    let accumulateur = 0;
 
-      carre.x += carre.vx;
-      carre.y += carre.vy;
+    // Physique
+    function mettreAJour(dt) {
+      carre.vx += carre.ax * dt * frottement;
+      carre.vy += carre.ay * dt * frottement;
+
+      carre.x += carre.vx * dt;
+      carre.y += carre.vy * dt;
 
       // Rebond sur les bords
       if (carre.x < 0) { carre.x = 0;}
@@ -64,8 +68,17 @@
     }
 
     // Boucle principale
-    function boucle() {
-      mettreAJour();
+    function boucle(tempsActuel) {
+      let tempsEcoule = (tempsActuel - dernierTemps) / 1000;
+      dernierTemps = tempsActuel;
+      if (tempsEcoule > 0.25) tempsEcoule = 0.25;
+      accumulateur += tempsEcoule;
+
+      while (accumulateur >= dt) {
+        mettreAJour(dt);
+        accululateur -= dt;
+      }
+      
       dessiner();
       requestAnimationFrame(boucle);
     }
