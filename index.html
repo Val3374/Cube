@@ -36,8 +36,8 @@
     // Écoute directe des mouvements sans permission préalable
     window.addEventListener('devicemotion', (event) => {
       if (event.accelerationIncludingGravity) {
-        carre.ax = (event.acceleration.x || 0);
-        carre.ay = -(event.acceleration.y || 0);
+        carre.ax = (event.acceleration.x || 0) / 50;
+        carre.ay = -(event.acceleration.y || 0) / 50;
       }
     });
 
