@@ -71,21 +71,6 @@
       requestAnimationFrame(boucle);
     }
 
-    // Autorisation iOS et initialisation
-    document.getElementById('btnAuth').addEventListener('click', () => {
-      if (typeof DeviceMotionEvent.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission()
-          .then(response => {
-            if (response === 'granted') {
-              window.addEventListener('devicemotion', GérerMouvement);
-            }
-          });
-      } else {
-        window.addEventListener('devicemotion', GérerMouvement);
-      }
-      document.getElementById('btnAuth').style.display = 'none';
-    });
-
     boucle();
   </script>
 </body>
