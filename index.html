@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulation Capteurs</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #1a1a1a; text-align: center; color: white; font-family: sans-serif; }
+    canvas { display: block; margin: 0 auto; background: #222; }
+    button { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); padding: 10px 20px; font-size: 16px; z-index: 10; }
+  </style>
+</head>
+<body>
+
+  <button id="btnAuth">Activer les capteurs</button>
+  <canvas id="monCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('monCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Propriétés du carré (Objet mathématique)
+    const carre = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      taille: 40,
+      vx: 0,
+      vy: 0,
+      ax: 0,
+      ay: 0
+    };
+
+    const frottement = 0.95; // Facteur d'amortissement
+
+    // Écoute de l'accéléromètre
+    function GérerMouvement(event) {
+      // Inversion des axes selon la tenue du téléphone
+      carre.ax = (event.accelerationIncludingGravity.x || 0) * 0.5;
+      carre.ay = -(event.accelerationIncludingGravity.y || 0) * 0.5;
+    }
+
+    // Mise à jour de la physique
+    function mettreAJour() {
+      carre.vx = (carre.vx + carre.ax) * frottement;
+      carre.vy = (carre.vy + carre.ay) * frottement;
+
+      carre.x += carre.vx;
+      carre.y += carre.vy;
+
+      // Gestion des collisions avec les bords de l'écran
+      if (carre.x < 0) { carre.x = 0; carre.vx = -carre.vx * 0.5; }
+      if (carre.x + carre.taille > canvas.width) { carre.x = canvas.width - carre.taille; carre.vx = -carre.vx * 0.5; }
+      if (carre.y < 0) { carre.y = 0; carre.vy = -carre.vy * 0.5; }
+      if (carre.y + carre.taille > canvas.height) { carre.y = canvas.height - carre.taille; carre.vy = -carre.vy * 0.5; }
+    }
+
+    // Rendu graphique
+    function dessiner() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#00ffcc';
+      ctx.fillRect(carre.x, carre.y, carre.taille, carre.taille);
+    }
+
+    // Boucle d'animation
+    function boucle() {
+      mettreAJour();
+      dessiner();
+      requestAnimationFrame(boucle);
+    }
+
+    // Autorisation iOS et initialisation
+    document.getElementById('btnAuth').addEventListener('click', () => {
+      if (typeof DeviceMotionEvent.requestPermission === 'function') {
+        DeviceMotionEvent.requestPermission()
+          .then(response => {
+            if (response === 'granted') {
+              window.addEventListener('devicemotion', GérerMouvement);
+            }
+          });
+      } else {
+        window.addEventListener('devicemotion', GérerMouvement);
+      }
+      document.getElementById('btnAuth').style.display = 'none';
+    });
+
+    boucle();
+  </script>
+</body>
+</html>
