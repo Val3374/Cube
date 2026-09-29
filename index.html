@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulation Capteurs</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #1a1a1a; text-align: center; color: white; font-family: sans-serif; }
-    canvas { display: block; margin: 0 auto; background: #222; }
-    button { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); padding: 10px 20px; font-size: 16px; z-index: 10; }
+    body { margin: 0; overflow: hidden; background: #1a1a1a; }
+    canvas { display: block; background: #222; }
   </style>
 </head>
 <body>
+
+  <canvas id="monCanvas"></canvas>
 
   <script>
     const canvas = document.getElementById('monCanvas');
@@ -19,7 +20,7 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Propriétés du carré (Objet mathématique)
+    // Objet carré
     const carre = {
       x: canvas.width / 2,
       y: canvas.height / 2,
@@ -30,16 +31,17 @@
       ay: 0
     };
 
-    const frottement = 0.95; // Facteur d'amortissement
+    const frottement = 0.95;
 
-    // Écoute de l'accéléromètre
-    function GérerMouvement(event) {
-      // Inversion des axes selon la tenue du téléphone
-      carre.ax = (event.accelerationExcludingGravity.x || 0);
-      carre.ay = -(event.accelerationExcludingGravity.y || 0);
-    }
+    // Écoute directe des mouvements sans permission préalable
+    window.addEventListener('devicemotion', (event) => {
+      if (event.accelerationIncludingGravity) {
+        carre.ax = (event.accelerationExcludingGravity.x || 0);
+        carre.ay = -(event.accelerationExcludingGravity.y || 0);
+      }
+    });
 
-    // Mise à jour de la physique
+    // Physique
     function mettreAJour() {
       carre.vx = (carre.vx + carre.ax) * frottement;
       carre.vy = (carre.vy + carre.ay) * frottement;
@@ -47,21 +49,21 @@
       carre.x += carre.vx;
       carre.y += carre.vy;
 
-      // Gestion des collisions avec les bords de l'écran
+      // Rebond sur les bords
       if (carre.x < 0) { carre.x = 0; carre.vx = -carre.vx * 0.5; }
       if (carre.x + carre.taille > canvas.width) { carre.x = canvas.width - carre.taille; carre.vx = -carre.vx * 0.5; }
       if (carre.y < 0) { carre.y = 0; carre.vy = -carre.vy * 0.5; }
       if (carre.y + carre.taille > canvas.height) { carre.y = canvas.height - carre.taille; carre.vy = -carre.vy * 0.5; }
     }
 
-    // Rendu graphique
+    // Rendu
     function dessiner() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = '#00ffcc';
       ctx.fillRect(carre.x, carre.y, carre.taille, carre.taille);
     }
 
-    // Boucle d'animation
+    // Boucle principale
     function boucle() {
       mettreAJour();
       dessiner();
